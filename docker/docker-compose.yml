@@ -1,0 +1,44 @@
+version: '3.7'
+
+services:
+  droopy-api:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile
+    container_name: droopy-api
+    ports:
+      - 3001:3001
+    depends_on:
+      - droopy-db
+    entrypoint:
+      - npm
+      - run
+      - start:dev
+    env_file:
+      - ../.env
+    volumes:
+      - ../:/app/
+      - ../public:/app/public
+      - /tmp:/tmp
+    networks:
+      - droopy-network
+
+  droopy-db:
+    image: mysql:5.7
+    container_name: droopy-db
+    command: mysqld --sql_mode=""
+    ports:
+      - '3306:3306'
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    volumes:
+      - mysql_volume:/var/lib/mysql
+      - ../docker/my.cnf:/etc/mysql/my.cnf
+    networks:
+      - droopy-network
+volumes:
+  mysql_volume:
+
+networks:
+  droopy-network:
+    name: droopy-network

@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "es2017",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./src",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
+    "resolveJsonModule": true,
+    "paths": {
+      "@/business/*": ["business/*"],
+      "@/configs/*": ["common/configs/*"],
+      "@/decorators/*": ["common/decorators/*"],
+      "@/enums/*": ["common/enums/*"],
+      "@/filters/*": ["common/filters/*"],
+      "@/guards/*": ["common/guards/*"],
+      "@/helpers/*": ["common/helpers/*"],
+      "@/interceptors/*": ["common/interceptors/*"],
+      "@/interfaces/*": ["common/interfaces/*"],
+      "@/pipes/*": ["common/pipes/*"],
+      "@/responses/*": ["common/responses/*"],
+      "@/services/*": ["common/services/*"],
+      "@/test/*": ["test/*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}
