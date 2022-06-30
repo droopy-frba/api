@@ -1,0 +1,6 @@
+export enum EUserRole {
+  FILMMAKER,
+  CONSUMER,
+  CONSUMER_ADMINISTRATOR,
+  ADMINISTRATOR,
+}
