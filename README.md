@@ -19,7 +19,7 @@ CREATE database droopy;
 
 #### Run migrations
 ```bash
-docker exec petaverse-api npm run migration:run  
+docker exec droopy-api npm run migration:run  
 ```
 
 #### Run Server
