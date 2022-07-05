@@ -1,3 +1,4 @@
+import { Exclude, instanceToPlain } from 'class-transformer';
 import { Column, Entity } from 'typeorm';
 
 import { BaseEntity } from '@/business/base.entity';
@@ -14,6 +15,7 @@ export class UserEntity extends BaseEntity {
   @Column({ unique: true })
   email: string;
 
+  @Exclude({ toPlainOnly: true })
   @Column()
   password?: string;
 
@@ -25,4 +27,8 @@ export class UserEntity extends BaseEntity {
 
   @Column()
   role: EUserRole;
+
+  toJSON() {
+    return instanceToPlain(this);
+  }
 }
