@@ -10,6 +10,6 @@ export class ConsumerEntity extends BaseEntity {
   @OneToOne(() => UserEntity)
   user: UserEntity;
 
-  @ManyToOne(() => CompanyEntity)
+  @ManyToOne(() => CompanyEntity, { cascade: true })
   company: CompanyEntity;
 }

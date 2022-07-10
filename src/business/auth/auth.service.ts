@@ -4,6 +4,7 @@ import { plainToClass } from 'class-transformer';
 
 import { CONFIG } from '@/configs/config';
 import { EUserRole } from '@/enums/user.enums';
+import { hashString } from '@/helpers/password.helpers';
 
 import { ConsumerEntity } from '../consumer/consumer.entity';
 import { ConsumerRepository } from '../consumer/consumer.repository';
@@ -64,11 +65,12 @@ export class AuthService {
     }
     const verificationToken = await this.createUserToken();
 
+    const hashedPassword = await hashString(userDTO.password);
     const user = plainToClass(UserEntity, {
       name: userDTO.name,
       lastName: userDTO.lastName,
       email: userDTO.email,
-      password: userDTO.password,
+      password: hashedPassword,
       role: userDTO.role,
       verificationToken: verificationToken.token,
       verificationTokenExpiration: verificationToken.expiration,
