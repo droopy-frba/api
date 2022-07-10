@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, Inject } from '@nestjs/common';
 import { hash } from 'bcryptjs';
 import { plainToClass } from 'class-transformer';
 
@@ -10,14 +10,17 @@ import { ConsumerRepository } from '../consumer/consumer.repository';
 import { FilmmakerEntity } from '../filmmaker/filmmaker.entity';
 import { FilmmakerRepository } from '../filmmaker/filmmaker.repository';
 import { UserEntity } from '../user/user.entity';
-import { UserRepository } from '../user/user.repository';
+import { UserRepo } from '../user/user.repository';
 import { SignupDTO } from './dto/signup.dto';
 
 export class AuthService {
   constructor(
-    private userRepository: UserRepository,
-    private consumerRepository: ConsumerRepository,
-    private filmmakerRepository: FilmmakerRepository,
+    @Inject(UserRepo)
+    private readonly userRepository: UserRepo,
+    @Inject(ConsumerRepository)
+    private readonly consumerRepository: ConsumerRepository,
+    @Inject(FilmmakerRepository)
+    private readonly filmmakerRepository: FilmmakerRepository,
   ) {}
 
   async createUserToken() {
