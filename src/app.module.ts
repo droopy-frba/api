@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { DB_CONFIG } from '@/configs/db';
 
+import { AuthModule } from './business/auth/auth.module';
 import { ChatMessageModule } from './business/chatMessage/chatMessage.module';
 import { CompanyModule } from './business/company/company.module';
 import { ConsumerModule } from './business/consumer/consumer.module';
@@ -20,6 +21,7 @@ import { UserModule } from './business/user/user.module';
     UserModule,
     ConsumerModule,
     FilmmakerModule,
+    AuthModule,
     PaymentModule,
     SuscriptionModule,
     FilmmakerReviewModule,

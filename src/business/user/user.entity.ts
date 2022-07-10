@@ -20,7 +20,10 @@ export class UserEntity extends BaseEntity {
   password?: string;
 
   @Column()
-  verificationToken?: string;
+  verificationToken: string;
+
+  @Column()
+  verificationTokenExpiration: Date;
 
   @Column({ name: 'activation_status' })
   activationStatus: string;
