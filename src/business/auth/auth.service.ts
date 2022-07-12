@@ -1,57 +1,69 @@
 import { BadRequestException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { hash } from 'bcryptjs';
 import { plainToClass } from 'class-transformer';
 
+import { CompanyRepository } from '@/business/company/company.repository';
+import { ConsumerEntity } from '@/business/consumer/consumer.entity';
+import { ConsumerRepository } from '@/business/consumer/consumer.repository';
+import { FilmmakerEntity } from '@/business/filmmaker/filmmaker.entity';
+import { FilmmakerRepository } from '@/business/filmmaker/filmmaker.repository';
+import { UserEntity } from '@/business/user/user.entity';
+import { UserRepository } from '@/business/user/user.repository';
 import { CONFIG } from '@/configs/config';
 import { EUserRole } from '@/enums/user.enums';
 import { compareHashes, hashString } from '@/helpers/password.helpers';
+import mailerService from '@/services/sendgrid.services';
+import { generateVerifyUserEmail } from '@/templates/verifyEmail.templates';
 
-import { ConsumerEntity } from '../consumer/consumer.entity';
-import { ConsumerRepository } from '../consumer/consumer.repository';
-import { FilmmakerEntity } from '../filmmaker/filmmaker.entity';
-import { FilmmakerRepository } from '../filmmaker/filmmaker.repository';
-import { UserEntity } from '../user/user.entity';
-import { UserRepo } from '../user/user.repository';
 import { SignupDTO } from './dto/signup.dto';
 
 export class AuthService {
   constructor(
-    @Inject(UserRepo)
-    private readonly userRepository: UserRepo,
+    @Inject(UserRepository)
+    private readonly userRepository: UserRepository,
     @Inject(ConsumerRepository)
     private readonly consumerRepository: ConsumerRepository,
     @Inject(FilmmakerRepository)
     private readonly filmmakerRepository: FilmmakerRepository,
+    @Inject(CompanyRepository)
+    private readonly companyRepository: CompanyRepository,
     private jwtService: JwtService,
   ) {}
 
   async signup(userDTO: SignupDTO) {
-    const existingUser = await this.userRepository.findByEmail(userDTO.email);
-    if (existingUser) {
-      throw new BadRequestException('User already exists');
+    let savedUser: UserEntity;
+    let savedConsumer: ConsumerEntity;
+    let savedFilmmaker: FilmmakerEntity;
+    try {
+      const existingUser = await this.userRepository.findByEmail(userDTO.email);
+      if (existingUser) {
+        throw new BadRequestException('User already exists');
+      }
+
+      const hashedPassword = await hashString(userDTO.password);
+      const verificationCode = this.generateVerificationCode();
+      const user = plainToClass(UserEntity, {
+        name: userDTO.name,
+        lastName: userDTO.lastName,
+        email: userDTO.email,
+        password: hashedPassword,
+        role: userDTO.role,
+        verificationCode: verificationCode.code,
+        verificationCodeExpiration: verificationCode.expiration,
+      });
+
+      savedUser = await this.userRepository.save(user);
+
+      if (user.role === EUserRole.CONSUMER) {
+        savedConsumer = await this.consumerRepository.save(this.createConsumer(userDTO, user));
+      } else {
+        savedFilmmaker = await this.filmmakerRepository.save(this.createFilmmaker(userDTO, user));
+      }
+      await mailerService(generateVerifyUserEmail([user.email], verificationCode.code));
+    } catch (error) {
+      await this.rollbackSignup(savedUser, savedConsumer, savedFilmmaker);
+      throw error;
     }
-    const verificationToken = await this.createUserToken();
-
-    const hashedPassword = await hashString(userDTO.password);
-    const user = plainToClass(UserEntity, {
-      name: userDTO.name,
-      lastName: userDTO.lastName,
-      email: userDTO.email,
-      password: hashedPassword,
-      role: userDTO.role,
-      verificationToken: verificationToken.token,
-      verificationTokenExpiration: verificationToken.expiration,
-    });
-
-    await this.userRepository.save(user);
-
-    if (user.role === EUserRole.CONSUMER) {
-      await this.consumerRepository.save(this.createConsumer(userDTO, user));
-    } else {
-      await this.filmmakerRepository.save(this.createFilmmaker(userDTO, user));
-    }
-    // mandar email
   }
 
   async login(user: UserEntity) {
@@ -65,7 +77,7 @@ export class AuthService {
 
   async validateUserCredentials(email: string, password: string) {
     const data = await this.userRepository.findByEmail(email);
-    if (data) {
+    if (data && data.emailVerified) {
       const validPassword = await compareHashes(password, data.password);
       if (validPassword) {
         return data;
@@ -82,18 +94,26 @@ export class AuthService {
     return null;
   }
 
-  private async createUserToken() {
-    // Token
-    const currentDate = new Date().toUTCString();
-    const randomNumber = (Math.random() * 100000).toString();
-    const token = await hash(currentDate.concat(randomNumber), 10);
-    // Expiration
-    const { expiresIn } = CONFIG.jwt;
-    const date = new Date();
-    date.setSeconds(date.getSeconds() + expiresIn);
+  private async rollbackSignup(user?: UserEntity, consumer?: ConsumerEntity, filmmaker?: FilmmakerEntity) {
+    if (consumer) {
+      await this.consumerRepository.delete(consumer.uuid);
+      await this.companyRepository.delete(consumer.company.uuid);
+    }
+    if (filmmaker) {
+      await this.filmmakerRepository.delete(filmmaker.uuid);
+    }
+    if (user) {
+      await this.userRepository.delete(user.uuid);
+    }
+  }
+
+  private generateVerificationCode() {
+    const { digits } = CONFIG.userVerification;
+    const min = 10 ** (digits - 1);
+    const max = Number('9'.repeat(digits));
     return {
-      token: token.split('.').join(''),
-      expiration: date,
+      code: min + Math.floor(Math.random() * max),
+      expiration: new Date(Date.now() + CONFIG.userVerification.expirationMinutes * 60000),
     };
   }
 

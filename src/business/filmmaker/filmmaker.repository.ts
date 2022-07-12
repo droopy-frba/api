@@ -14,4 +14,8 @@ export class FilmmakerRepository {
   async save(user: FilmmakerEntity) {
     return this.repository.save(user);
   }
+
+  async delete(uuid: string) {
+    return this.repository.delete(uuid);
+  }
 }

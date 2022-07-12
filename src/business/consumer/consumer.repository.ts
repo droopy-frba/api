@@ -14,4 +14,8 @@ export class ConsumerRepository {
   async save(user: ConsumerEntity) {
     return this.repository.save(user);
   }
+
+  async delete(uuid: string) {
+    return this.repository.delete(uuid);
+  }
 }

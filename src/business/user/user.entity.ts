@@ -17,16 +17,18 @@ export class UserEntity extends BaseEntity {
 
   @Exclude({ toPlainOnly: true })
   @Column()
-  password?: string;
+  password: string;
 
+  @Exclude({ toPlainOnly: true })
   @Column()
-  verificationToken: string;
+  verificationCode: number;
 
+  @Exclude({ toPlainOnly: true })
   @Column()
-  verificationTokenExpiration: Date;
+  verificationCodeExpiration: Date;
 
-  @Column({ name: 'activation_status' })
-  activationStatus: string;
+  @Column({ name: 'email_verified', default: false })
+  emailVerified?: boolean;
 
   @Column()
   role: EUserRole;
