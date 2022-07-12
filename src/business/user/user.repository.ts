@@ -11,6 +11,10 @@ export class UserRepository {
     private repository: Repository<UserEntity>,
   ) {}
 
+  async update(uuid: string, user: Partial<UserEntity>) {
+    return this.repository.update(uuid, user);
+  }
+
   async findByEmail(email: string) {
     return this.repository.findOne({ email });
   }
