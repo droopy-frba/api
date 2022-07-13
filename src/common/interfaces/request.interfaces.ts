@@ -1,4 +1,4 @@
-import { UserEntity } from '@/business/user/user.entity';
+import { UserEntity } from '@/business/repositories/user/user.entity';
 
 export interface LoggedRequest extends Request {
   user: UserEntity;
