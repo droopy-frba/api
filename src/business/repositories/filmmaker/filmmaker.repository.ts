@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository, TransactionManager } from 'typeorm';
 
 import { FilmmakerEntity } from './filmmaker.entity';
 
@@ -11,8 +11,11 @@ export class FilmmakerRepository {
     private repository: Repository<FilmmakerEntity>,
   ) {}
 
-  async save(user: FilmmakerEntity) {
-    return this.repository.save(user);
+  async save(filmmaker: FilmmakerEntity, @TransactionManager() transactionManager?: EntityManager) {
+    if (transactionManager) {
+      return transactionManager.save(FilmmakerEntity, filmmaker);
+    }
+    return this.repository.save(filmmaker);
   }
 
   async delete(uuid: string) {

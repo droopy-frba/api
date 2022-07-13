@@ -1,9 +1,9 @@
 import { BadRequestException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { plainToClass } from 'class-transformer';
+import { getManager } from 'typeorm';
 
 import { SignupDTO } from '@/business/controllers/auth/dto/signup.dto';
-import { CompanyRepository } from '@/business/repositories/company/company.repository';
 import { ConsumerEntity } from '@/business/repositories/consumer/consumer.entity';
 import { ConsumerRepository } from '@/business/repositories/consumer/consumer.repository';
 import { FilmmakerEntity } from '@/business/repositories/filmmaker/filmmaker.entity';
@@ -25,8 +25,6 @@ export class AuthService {
     private readonly consumerRepository: ConsumerRepository,
     @Inject(FilmmakerRepository)
     private readonly filmmakerRepository: FilmmakerRepository,
-    @Inject(CompanyRepository)
-    private readonly companyRepository: CompanyRepository,
     private jwtService: JwtService,
   ) {}
 
@@ -34,37 +32,40 @@ export class AuthService {
     let savedUser: UserEntity;
     let savedConsumer: ConsumerEntity;
     let savedFilmmaker: FilmmakerEntity;
-    try {
-      const existingUser = await this.userRepository.findByEmail(userDTO.email);
-      if (existingUser) {
-        throw new BadRequestException('User already exists');
-      }
-
-      const hashedPassword = await hashString(userDTO.password);
-      const verificationCode = generateVerificationCode();
-      const user = plainToClass(UserEntity, {
-        name: userDTO.name,
-        lastName: userDTO.lastName,
-        email: userDTO.email,
-        password: hashedPassword,
-        role: userDTO.role,
-        verificationCode: verificationCode.code,
-        verificationCodeExpiration: verificationCode.expiration,
-      });
-
-      savedUser = await this.userRepository.save(user);
-
-      if (user.role === EUserRole.CONSUMER) {
-        savedConsumer = await this.consumerRepository.save(this.createConsumer(userDTO, user));
-      } else {
-        savedFilmmaker = await this.filmmakerRepository.save(this.createFilmmaker(userDTO, user));
-      }
-      await mailerService(generateVerifyUserEmail([user.email], verificationCode.code));
-      return this.login(savedUser);
-    } catch (error) {
-      await this.rollbackSignup(savedUser, savedConsumer, savedFilmmaker);
-      throw error;
+    const existingUser = await this.userRepository.findByEmail(userDTO.email);
+    if (existingUser) {
+      throw new BadRequestException('User already exists');
     }
+
+    const hashedPassword = await hashString(userDTO.password);
+    const verificationCode = generateVerificationCode();
+    const user = plainToClass(UserEntity, {
+      name: userDTO.name,
+      lastName: userDTO.lastName,
+      email: userDTO.email,
+      password: hashedPassword,
+      role: userDTO.role,
+      verificationCode: verificationCode.code,
+      verificationCodeExpiration: verificationCode.expiration,
+    });
+
+    if (user.role === EUserRole.CONSUMER) {
+      savedConsumer = this.createConsumer(userDTO, user);
+    } else {
+      savedFilmmaker = this.createFilmmaker(userDTO, user);
+    }
+
+    await getManager().transaction(async (transactionalEntityManager) => {
+      savedUser = await this.userRepository.save(user, transactionalEntityManager);
+      // throw new Error('error');
+      if (savedConsumer) {
+        await this.consumerRepository.save(savedConsumer, transactionalEntityManager);
+      } else {
+        await this.filmmakerRepository.save(savedFilmmaker, transactionalEntityManager);
+      }
+    });
+    await mailerService(generateVerifyUserEmail([savedUser.email], verificationCode.code));
+    return this.login(savedUser);
   }
 
   async login(user: UserEntity) {
@@ -94,19 +95,6 @@ export class AuthService {
       return data;
     }
     return null;
-  }
-
-  private async rollbackSignup(user?: UserEntity, consumer?: ConsumerEntity, filmmaker?: FilmmakerEntity) {
-    if (consumer) {
-      await this.consumerRepository.delete(consumer.uuid);
-      await this.companyRepository.delete(consumer.company.uuid);
-    }
-    if (filmmaker) {
-      await this.filmmakerRepository.delete(filmmaker.uuid);
-    }
-    if (user) {
-      await this.userRepository.delete(user.uuid);
-    }
   }
 
   private createConsumer(userDTO: SignupDTO, user: UserEntity) {

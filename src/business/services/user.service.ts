@@ -21,7 +21,8 @@ export class UserService {
       throw new BadRequestException('Verification code expired');
     }
     await this.repository.update(user.uuid, { emailVerified: true });
-    return { ...user, emailVerified: true };
+    user.emailVerified = true;
+    return user;
   }
 
   async resendCode(user: UserEntity) {
