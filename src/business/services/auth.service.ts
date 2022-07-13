@@ -13,6 +13,7 @@ import { UserRepository } from '@/business/repositories/user/user.repository';
 import { CONFIG } from '@/configs/config';
 import { EUserRole } from '@/enums/user.enums';
 import { compareHashes, hashString } from '@/helpers/password.helpers';
+import { generateVerificationCode } from '@/helpers/verificationCode.helpers';
 import mailerService from '@/services/sendgrid.services';
 import { generateVerifyUserEmail } from '@/templates/verifyEmail.templates';
 
@@ -40,7 +41,7 @@ export class AuthService {
       }
 
       const hashedPassword = await hashString(userDTO.password);
-      const verificationCode = this.generateVerificationCode();
+      const verificationCode = generateVerificationCode();
       const user = plainToClass(UserEntity, {
         name: userDTO.name,
         lastName: userDTO.lastName,
@@ -59,6 +60,7 @@ export class AuthService {
         savedFilmmaker = await this.filmmakerRepository.save(this.createFilmmaker(userDTO, user));
       }
       await mailerService(generateVerifyUserEmail([user.email], verificationCode.code));
+      return this.login(savedUser);
     } catch (error) {
       await this.rollbackSignup(savedUser, savedConsumer, savedFilmmaker);
       throw error;
@@ -69,6 +71,7 @@ export class AuthService {
     const { expiresIn } = CONFIG.jwt;
     const payload = { email: user.email };
     return {
+      user,
       token: this.jwtService.sign(payload, { expiresIn }),
       expiresIn,
     };
@@ -76,7 +79,7 @@ export class AuthService {
 
   async validateUserCredentials(email: string, password: string) {
     const data = await this.userRepository.findByEmail(email);
-    if (data && data.emailVerified) {
+    if (data) {
       const validPassword = await compareHashes(password, data.password);
       if (validPassword) {
         return data;
@@ -104,16 +107,6 @@ export class AuthService {
     if (user) {
       await this.userRepository.delete(user.uuid);
     }
-  }
-
-  private generateVerificationCode() {
-    const { digits } = CONFIG.userVerification;
-    const min = 10 ** (digits - 1);
-    const max = Number('9'.repeat(digits));
-    return {
-      code: min + Math.floor(Math.random() * max),
-      expiration: new Date(Date.now() + CONFIG.userVerification.expirationMinutes * 60000),
-    };
   }
 
   private createConsumer(userDTO: SignupDTO, user: UserEntity) {
