@@ -1,3 +1,4 @@
+import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 
 import { CONFIG } from '@/configs/config';
@@ -12,6 +13,7 @@ async function bootstrap() {
   app.setGlobalPrefix(CONFIG.nest.prefix);
   app.useGlobalFilters(new GlobalExceptionFilter());
   app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalPipes(new ValidationPipe());
   await app.listen(CONFIG.nest.port);
 }
 

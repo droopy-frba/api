@@ -21,6 +21,7 @@
     "paths": {
       "@/business/*": ["business/*"],
       "@/configs/*": ["common/configs/*"],
+      "@/constants/*": ["common/constants/*"],
       "@/decorators/*": ["common/decorators/*"],
       "@/enums/*": ["common/enums/*"],
       "@/filters/*": ["common/filters/*"],
@@ -31,6 +32,7 @@
       "@/pipes/*": ["common/pipes/*"],
       "@/responses/*": ["common/responses/*"],
       "@/services/*": ["common/services/*"],
+      "@/templates/*": ["common/templates/*"],
       "@/test/*": ["test/*"]
     }
   },
