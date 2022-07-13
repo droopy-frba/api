@@ -7,7 +7,7 @@ services:
       dockerfile: docker/Dockerfile
     container_name: droopy-api
     ports:
-      - 3003:3002
+      - 3001:3001
     depends_on:
       - droopy-db
     entrypoint:
