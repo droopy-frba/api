@@ -3,17 +3,17 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { DB_CONFIG } from '@/configs/db';
 
-import { AuthModule } from './business/auth/auth.module';
-import { ChatMessageModule } from './business/chatMessage/chatMessage.module';
-import { CompanyModule } from './business/company/company.module';
-import { ConsumerModule } from './business/consumer/consumer.module';
-import { FilmPostulationModule } from './business/filmPostulation/filmPostulation.module';
-import { FilmSearchModule } from './business/filmSearch/filmSearch.module';
-import { FilmmakerModule } from './business/filmmaker/filmmaker.module';
-import { FilmmakerReviewModule } from './business/filmmakerReview/filmmakerReview.module';
-import { PaymentModule } from './business/payment/payment.module';
-import { SuscriptionModule } from './business/suscription/suscription.module';
-import { UserModule } from './business/user/user.module';
+import { AuthModule } from './business/modules/auth.module';
+import { ChatMessageModule } from './business/modules/chatMessage.module';
+import { CompanyModule } from './business/modules/company.module';
+import { ConsumerModule } from './business/modules/consumer.module';
+import { FilmPostulationModule } from './business/modules/filmPostulation.module';
+import { FilmSearchModule } from './business/modules/filmSearch.module';
+import { FilmmakerModule } from './business/modules/filmmaker.module';
+import { FilmmakerReviewModule } from './business/modules/filmmakerReview.module';
+import { PaymentModule } from './business/modules/payment.module';
+import { SuscriptionModule } from './business/modules/suscription.module';
+import { UserModule } from './business/modules/user.module';
 
 @Module({
   imports: [
