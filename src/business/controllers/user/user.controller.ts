@@ -1,7 +1,9 @@
-import { Body, Controller, Post, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
 
+import { UserEntity } from '@/business/repositories/user/user.entity';
 import { UserService } from '@/business/services/user.service';
-import { EmailInterceptor } from '@/interceptors/email.interceptors';
+import { JwtAuthGuard } from '@/guards/jwtAuth.guards';
+import { LoggedRequest } from '@/interfaces/request.interfaces';
 
 import { VerifyCodeDTO } from './dto/verifyCode.dto';
 
@@ -9,9 +11,15 @@ import { VerifyCodeDTO } from './dto/verifyCode.dto';
 export class UserController {
   constructor(private service: UserService) {}
 
-  @UseInterceptors(EmailInterceptor)
+  @UseGuards(JwtAuthGuard)
   @Post('verify')
-  async verifyCode(@Body() { email, code }: VerifyCodeDTO) {
-    return this.service.verifyCode(email, code);
+  async verifyCode(@Request() req: LoggedRequest, @Body() { code }: VerifyCodeDTO): Promise<UserEntity> {
+    return this.service.verifyCode(req.user.email, code);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('resend-code')
+  async resendCode(@Request() req: LoggedRequest) {
+    return this.service.resendCode(req.user);
   }
 }
