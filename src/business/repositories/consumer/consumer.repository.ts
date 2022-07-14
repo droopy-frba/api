@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository, TransactionManager } from 'typeorm';
 
 import { ConsumerEntity } from './consumer.entity';
 
@@ -11,8 +11,11 @@ export class ConsumerRepository {
     private repository: Repository<ConsumerEntity>,
   ) {}
 
-  async save(user: ConsumerEntity) {
-    return this.repository.save(user);
+  async save(consumer: ConsumerEntity, @TransactionManager() transactionManager?: EntityManager) {
+    if (transactionManager) {
+      return transactionManager.save(ConsumerEntity, consumer);
+    }
+    return this.repository.save(consumer);
   }
 
   async delete(uuid: string) {

@@ -12,7 +12,7 @@ const mailerService = async (emailData: IEmail) => {
     return true;
   } catch (error) {
     Logger.error('Error sending sendgrid email', error);
-    return false;
+    throw error;
   }
 };
 
