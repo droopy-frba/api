@@ -6,6 +6,7 @@ import { EFilmSearchStatus } from '@/enums/filmSearch.enums';
 import { ESuscriptionStatus } from '@/enums/suscription.enums';
 
 import FilmSearchDTO from '../controllers/filmSearch/dto/filmsearch.dto';
+import FindClosestFilmSearchDto from '../controllers/filmSearch/dto/findClosestFilmSearch.dto';
 import { ConsumerRepository } from '../repositories/consumer/consumer.repository';
 import { FilmSearchEntity } from '../repositories/filmSearch/filmSearch.entity';
 import { SuscriptionRepository } from '../repositories/suscription/suscription.repository';
@@ -38,13 +39,19 @@ export class FilmSearchService {
     return this.filmSearchRepository.save(filmSearch);
   }
 
+  async findClosestsTo(body: FindClosestFilmSearchDto) {
+    return this.filmSearchRepository.findClosestsTo(body);
+  }
+
   async calculateExpirationTimestamp(minutesToExpiration: number) {
     return new Date().getTime() + minutesToExpiration * 60000;
   }
 
   async consumerHasActiveSubscription(consumerUuid: string) {
     const subscription = await this.getSubscriptionFromConsumerUuid(consumerUuid);
-    return subscription !== undefined && subscription.status === ESuscriptionStatus.ACTIVE;
+    return (
+      subscription !== undefined && subscription.status === ESuscriptionStatus.ACTIVE && subscription.availableHours > 0
+    );
   }
 
   async getSubscriptionFromConsumerUuid(consumerUuid: string) {
