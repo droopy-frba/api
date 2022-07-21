@@ -17,5 +17,5 @@ export default class FilmSearchDTO {
   consumerUuid: string;
 
   @IsNumber()
-  expirationTime: number; // in minutes
+  timeToExpiration: number; // in minutes
 }

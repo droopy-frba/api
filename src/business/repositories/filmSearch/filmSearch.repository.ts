@@ -21,6 +21,10 @@ export class FilmSearchRepository {
     return this.repository.delete(uuid);
   }
 
+  async findOne(uuid: string) {
+    return this.repository.findOne(uuid);
+  }
+
   async findClosestsTo(body: FindClosestFilmSearchDto) {
     const query =
       'SELECT uuid, title, description, locationLatitude, locationLongitude, locationDescription, (SQRT(POW(69.1 * (locationLatitude - ?), 2) + POW(69.1 * (? - locationLongitude) * COS(locationLatitude / 57.3), 2)))*1.6 AS distance FROM film_search HAVING distance < ? ORDER BY distance;';

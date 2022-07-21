@@ -18,4 +18,8 @@ export class SuscriptionEntity extends BaseEntity {
 
   @ManyToOne(() => CompanyEntity)
   company: CompanyEntity;
+
+  async isActive() {
+    return this.status === ESuscriptionStatus.ACTIVE && this.availableHours > 0;
+  }
 }
