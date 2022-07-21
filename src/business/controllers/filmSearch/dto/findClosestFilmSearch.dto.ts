@@ -3,7 +3,7 @@ import { IsNumber } from 'class-validator';
 
 import { Location } from '@/business/repositories/filmSearch/location';
 
-export default class FindClosestFilmSearchDto {
+export default class FindClosestFilmSearchDTO {
   @Type(() => Location)
   location: Location;
 

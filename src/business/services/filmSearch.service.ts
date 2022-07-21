@@ -5,7 +5,7 @@ import { FilmSearchRepository } from '@/business/repositories/filmSearch/filmSea
 import { EFilmSearchStatus } from '@/enums/filmSearch.enums';
 
 import FilmSearchDTO from '../controllers/filmSearch/dto/filmsearch.dto';
-import FindClosestFilmSearchDto from '../controllers/filmSearch/dto/findClosestFilmSearch.dto';
+import FindClosestFilmSearchDTO from '../controllers/filmSearch/dto/findClosestFilmSearch.dto';
 import UpdateFilmSearchDTO from '../controllers/filmSearch/dto/updateFilmSearch.dto';
 import { ConsumerRepository } from '../repositories/consumer/consumer.repository';
 import { FilmSearchEntity } from '../repositories/filmSearch/filmSearch.entity';
@@ -38,7 +38,7 @@ export class FilmSearchService {
     return this.filmSearchRepository.save(filmSearch);
   }
 
-  async findClosestsTo(body: FindClosestFilmSearchDto) {
+  async findClosestsTo(body: FindClosestFilmSearchDTO) {
     return this.filmSearchRepository.findClosestsTo(body);
   }
 
@@ -57,6 +57,11 @@ export class FilmSearchService {
       throw new BadRequestException('Film search not found');
     }
     return filmSearch;
+  }
+
+  async delete(uuid: string) {
+    this.findByUuid(uuid);
+    return this.filmSearchRepository.delete(uuid);
   }
 
   async calculateExpirationDate(minutesToExpiration: number) {

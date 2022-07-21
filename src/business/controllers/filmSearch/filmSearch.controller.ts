@@ -3,7 +3,7 @@ import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { FilmSearchService } from '@/business/services/filmSearch.service';
 
 import FilmSearchDTO from './dto/filmsearch.dto';
-import FindClosestFilmSearchDto from './dto/findClosestFilmSearch.dto';
+import FindClosestFilmSearchDTO from './dto/findClosestFilmSearch.dto';
 import UpdateFilmSearchDTO from './dto/updateFilmSearch.dto';
 
 @Controller('film_search')
@@ -16,7 +16,7 @@ export class FilmSearchController {
   }
 
   @Post('find_closests')
-  async findClosestsTo(@Body() body: FindClosestFilmSearchDto) {
+  async findClosestsTo(@Body() body: FindClosestFilmSearchDTO) {
     return this.service.findClosestsTo(body);
   }
 
@@ -28,5 +28,10 @@ export class FilmSearchController {
   @Get('find')
   async findByUuid(@Query('uuid') uuid: string) {
     return this.service.findByUuid(uuid);
+  }
+
+  @Post('delete')
+  async delete(@Query('uuid') uuid: string) {
+    return this.service.delete(uuid);
   }
 }
