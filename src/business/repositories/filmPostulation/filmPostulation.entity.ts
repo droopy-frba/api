@@ -14,7 +14,7 @@ export class FilmPostulationEntity extends BaseEntity {
   @ManyToOne(() => FilmSearchEntity)
   filmSearch: FilmSearchEntity;
 
-  @Column()
+  @Column({ default: EFilmPostulationStatus.NEW })
   status: EFilmPostulationStatus;
 
   // TODO: check how this integrates with agora

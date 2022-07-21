@@ -21,4 +21,8 @@ export class FilmmakerRepository {
   async delete(uuid: string) {
     return this.repository.delete(uuid);
   }
+
+  async findByUuid(uuid: string) {
+    return this.repository.findOne(uuid);
+  }
 }
