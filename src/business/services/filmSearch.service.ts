@@ -80,8 +80,8 @@ export class FilmSearchService {
       title: body.title || filmSearch.title,
       status: EFilmSearchStatus.PENDING || filmSearch.status,
       description: body.description || filmSearch.description,
-      expirationDate: this.calculateExpirationDate(body.timeToExpiration) || filmSearch.expirationDate,
-      consumer: this.consumerRepository.findOne(body.consumerUuid) || filmSearch.consumer,
+      expirationDate: (await this.calculateExpirationDate(body.timeToExpiration)) || filmSearch.expirationDate,
+      consumer: (await this.consumerRepository.findOne(body.consumerUuid)) || filmSearch.consumer,
       review: body.review || filmSearch.review,
     });
   }
