@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 
 import { SuscriptionEntity } from './suscription.entity';
 
@@ -11,8 +11,15 @@ export class SuscriptionRepository {
     private repository: Repository<SuscriptionEntity>,
   ) {}
 
-  async save(user: SuscriptionEntity) {
-    return this.repository.save(user);
+  async findById(uuid: string) {
+    return this.repository.findOne({ uuid });
+  }
+
+  async save(suscription: SuscriptionEntity, transaction?: EntityManager) {
+    if (transaction) {
+      return transaction.save(suscription);
+    }
+    return this.repository.save(suscription);
   }
 
   async delete(uuid: string) {

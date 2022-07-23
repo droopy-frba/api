@@ -4,18 +4,25 @@ import { BaseEntity } from '@/business/repositories/base.entity';
 import { ESuscriptionStatus } from '@/enums/suscription.enums';
 
 import { CompanyEntity } from '../company/company.entity';
+import { ProductEntity } from '../product/product.entity';
 
 @Entity({ name: 'suscription' })
 export class SuscriptionEntity extends BaseEntity {
+  @ManyToOne(() => ProductEntity)
+  product: ProductEntity;
+
   @Column()
   hours: number;
 
   @Column({ name: 'available_hours' })
   availableHours: number;
 
+  @ManyToOne(() => CompanyEntity)
+  company: CompanyEntity;
+
   @Column()
   status: ESuscriptionStatus;
 
-  @ManyToOne(() => CompanyEntity)
-  company: CompanyEntity;
+  @Column({ name: 'last_paid' })
+  lastPaid: Date;
 }
