@@ -1,6 +1,8 @@
 import { ConflictException } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
 import mercadopago from 'mercadopago';
+// eslint-disable-next-line import/no-unresolved
+import { Currency } from 'mercadopago/shared/currency';
 
 export class MercadoPagoResponse {
   id: string;
@@ -10,38 +12,31 @@ export class MercadoPagoResponse {
   redirectURL: string;
 
   payerId: string;
-
-  paymentMethodId: string;
-
-  nextPaymentDate: string;
 }
-export function sendPayment(cardId: string, amount: number, email: string): MercadoPagoResponse {
+export function sendPayment(amount: number, email: string): MercadoPagoResponse {
   const transaction = {
     reason: 'Suscripcion de Droopy',
-    payer: email,
-    card_token_id: cardId,
-    payment_method_id: cardId,
+    payer_email: email,
     auto_recurring: {
       frequency: 1,
-      frequency_type: 'months',
-      start_date: Date.now(),
-      currency_id: 'ARS',
+      frequency_type: 'months' as 'months' | 'days',
+      transaction_amount: amount,
+      currency_id: 'ARS' as Currency,
     },
-    transaction_amount: amount,
-    installments: null,
     back_url: 'https://www.droopy.com/confirmation',
-    status: 'authorized',
   };
-  mercadopago.payment
-    .save(transaction as any)
+
+  mercadopago.configurations.setAccessToken(
+    'Bearer TEST-4721290888328770-072316-e46fcf6f6c46814d105354413003e194-167954877',
+  );
+  mercadopago.preapproval
+    .create(transaction)
     .then(function (response) {
       return plainToClass(MercadoPagoResponse, {
         id: response.body.id,
         collectorId: response.body.collector_id,
         redirectURL: response.body.init_point,
         payerId: response.body.payer_id,
-        paymentMethodId: response.body.payment_method_id,
-        nextPaymentDate: response.body.next_payment_date,
       });
     })
     .catch(function (error) {

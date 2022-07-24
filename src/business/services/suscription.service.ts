@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
 import { getManager } from 'typeorm';
 
@@ -35,36 +35,37 @@ export class SuscriptionService {
     const product: ProductEntity = await this.productRepository.findByID(suscriptionData.product);
     const amount = suscriptionData.hours * product.price;
 
-    if (consumer && product) {
-      const suscription: SuscriptionEntity = plainToClass(SuscriptionEntity, {
-        product,
-        hours: suscriptionData.hours,
-        availableHours: suscriptionData.hours,
-        company: consumer.company,
-        lastPaid: null,
-        status: ESuscriptionStatus.ACTIVE,
-      });
-      const response: MercadoPagoResponse = sendPayment(suscriptionData.cardId, amount, user.email);
-
-      const payment: PaymentEntity = plainToClass(PaymentEntity, {
-        externalPaymentId: response.id,
-        status: EPaymentStatus.PENDING,
-        value: amount,
-        cardId: suscriptionData.cardId,
-        payerId: response.payerId,
-        collectorId: response.collectorId,
-        paymentMethodId: response.paymentMethodId,
-        suscription,
-      });
-      await getManager().transaction(async (transactionalEntityManager) => {
-        await this.suscriptionRepository.save(suscription, transactionalEntityManager);
-        await this.paymentRepository.save(payment, transactionalEntityManager);
-      });
-      return {
-        URL: response.redirectURL,
-      };
+    if (!consumer) {
+      throw new BadRequestException('The consumer does not exist.');
     }
-    return null;
+    if (!product) {
+      throw new BadRequestException('The product does not exist.');
+    }
+    const suscription: SuscriptionEntity = plainToClass(SuscriptionEntity, {
+      product,
+      hours: suscriptionData.hours,
+      availableHours: suscriptionData.hours,
+      company: consumer.company,
+      lastPaid: null,
+      status: ESuscriptionStatus.ACTIVE,
+    });
+    const response: MercadoPagoResponse = sendPayment(amount, user.email);
+
+    const payment: PaymentEntity = plainToClass(PaymentEntity, {
+      externalPaymentId: response.id,
+      status: EPaymentStatus.PENDING,
+      value: amount,
+      payerId: response.payerId,
+      collectorId: response.collectorId,
+      suscription,
+    });
+    await getManager().transaction(async (transactionalEntityManager) => {
+      await this.suscriptionRepository.save(suscription, transactionalEntityManager);
+      await this.paymentRepository.save(payment, transactionalEntityManager);
+    });
+    return {
+      URL: response.redirectURL,
+    };
   }
 
   async findById(id: string) {

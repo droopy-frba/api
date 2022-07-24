@@ -6,17 +6,16 @@ import { LoggedRequest } from '@/interfaces/request.interfaces';
 
 import { SuscriptionDTO } from './dto/suscription.dto';
 
+@UseGuards(JwtAuthGuard)
 @Controller('suscription')
 export class SuscriptionController {
   constructor(private service: SuscriptionService) {}
 
-  @UseGuards(JwtAuthGuard)
   @Post('new')
-  async create(@Request() req: LoggedRequest, @Body() suscription: SuscriptionDTO) {
+  async create(@Body() suscription: SuscriptionDTO, @Request() req: LoggedRequest) {
     return this.service.create(req.user, suscription);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get(':id')
   async findById(@Param('id') id: string) {
     return this.service.findById(id);
