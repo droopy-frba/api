@@ -9,7 +9,7 @@ import { Location } from './location';
 
 @Entity({ name: 'film_search' })
 export class FilmSearchEntity extends BaseEntity {
-  @ManyToOne(() => ConsumerEntity)
+  @ManyToOne(() => ConsumerEntity, { eager: true })
   consumer: ConsumerEntity;
 
   @Column(() => Location)

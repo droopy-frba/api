@@ -8,10 +8,10 @@ import { FilmmakerEntity } from '../filmmaker/filmmaker.entity';
 
 @Entity({ name: 'film_postulation' })
 export class FilmPostulationEntity extends BaseEntity {
-  @ManyToOne(() => FilmmakerEntity)
+  @ManyToOne(() => FilmmakerEntity, { eager: true })
   filmmaker: FilmmakerEntity;
 
-  @ManyToOne(() => FilmSearchEntity)
+  @ManyToOne(() => FilmSearchEntity, { eager: true })
   filmSearch: FilmSearchEntity;
 
   @Column({ default: EFilmPostulationStatus.NEW })

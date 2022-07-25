@@ -1,32 +1,25 @@
-import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Request, UseGuards } from '@nestjs/common';
 
 import { FilmPostulationService } from '@/business/services/filmPostulation.service';
-import { ParseNumberPipe } from '@/pipes/parseNumber.pipes';
+import { JwtAuthGuard } from '@/guards/jwtAuth.guards';
+import { LoggedRequest } from '@/interfaces/request.interfaces';
 
 import { CreateFilmPostulationDTO } from './dto/createFilmPostulation.dto';
 import { UpdateFilmPostulationDTO } from './dto/updateFilmPostulationDTO.dto';
 
+@UseGuards(JwtAuthGuard)
 @Controller('film_postulation')
 export class FilmPostulationController {
   constructor(private service: FilmPostulationService) {}
 
   @Post('/')
-  async create(@Body() body: CreateFilmPostulationDTO) {
-    return this.service.create(body);
+  async create(@Request() req: LoggedRequest, @Body() body: CreateFilmPostulationDTO) {
+    return this.service.create(req.user, body.filmSearchUuid);
   }
 
   @Patch('/:uuid')
-  async update(@Param('uuid') uuid: string, @Body() body: UpdateFilmPostulationDTO) {
-    return this.service.update(uuid, body);
-  }
-
-  @Get('/film-search/:filmSearchUuid')
-  async findByFilmSearch(
-    @Param(':filmSearchUuid') filmSearchUuid: string,
-    @Query('page', ParseNumberPipe) page: number,
-    @Query('size', ParseNumberPipe) size: number,
-  ) {
-    return this.service.findByFilmSearch(filmSearchUuid, page, size);
+  async update(@Param('uuid') uuid: string, @Request() req: LoggedRequest, @Body() body: UpdateFilmPostulationDTO) {
+    return this.service.update(uuid, req.user, body);
   }
 
   @Get(':uuid')

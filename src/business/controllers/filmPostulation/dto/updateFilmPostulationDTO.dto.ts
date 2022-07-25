@@ -1,19 +1,17 @@
-import { Optional } from '@nestjs/common';
-import { IsEnum, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 
 import { EFilmPostulationStatus } from '@/enums/filmPostulation.enums';
 
 export class UpdateFilmPostulationDTO {
   @IsEnum(EFilmPostulationStatus)
-  @Optional()
-  status: EFilmPostulationStatus;
+  @IsOptional()
+  status?: EFilmPostulationStatus;
 
-  // TODO: check how this integrates with agora
-  @Optional()
   @IsString()
-  stream: string;
+  @IsOptional()
+  stream?: string;
 
-  @Optional()
   @IsString()
-  chat: string;
+  @IsOptional()
+  chat?: string;
 }

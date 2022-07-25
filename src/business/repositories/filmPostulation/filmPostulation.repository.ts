@@ -23,8 +23,12 @@ export class FilmPostulationRepository {
     return this.repository.update(uuid, data);
   }
 
-  async findByFilmSearch(filmSearchUuid: string, page: number, size: number) {
-    return this.repository.find({ where: { filmSearch: filmSearchUuid }, take: (page + 1) * size, skip: page * size });
+  async findByFilmSearch(filmSearchUuid: string, limit: number, offset: number) {
+    return this.repository.find({ where: { filmSearch: filmSearchUuid }, take: limit, skip: offset });
+  }
+
+  async findBySearchAndFilmmaker(filmSearchUuid: string, filmmakerUuid: string) {
+    return this.repository.findOne({ where: { filmSearch: filmSearchUuid, filmmaker: filmmakerUuid } });
   }
 
   async findByUuid(uuid: string) {
