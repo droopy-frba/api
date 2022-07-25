@@ -49,14 +49,13 @@ export class AuthService {
       verificationCodeExpiration: verificationCode.expiration,
     });
 
-    if (user.role === EUserRole.CONSUMER) {
-      savedConsumer = this.createConsumer(userDTO, user);
-    } else {
-      savedFilmmaker = this.createFilmmaker(userDTO, user);
-    }
-
     await getManager().transaction(async (transactionalEntityManager) => {
       savedUser = await this.userRepository.save(user, transactionalEntityManager);
+      if (user.role === EUserRole.CONSUMER) {
+        savedConsumer = this.createConsumer(userDTO, savedUser);
+      } else {
+        savedFilmmaker = this.createFilmmaker(userDTO, savedUser);
+      }
       // throw new Error('error');
       if (savedConsumer) {
         await this.consumerRepository.save(savedConsumer, transactionalEntityManager);

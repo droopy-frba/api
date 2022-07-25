@@ -1,37 +1,42 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseFloatPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
 
 import { FilmSearchService } from '@/business/services/filmSearch.service';
+import { JwtAuthGuard } from '@/guards/jwtAuth.guards';
 
 import FilmSearchDTO from './dto/filmsearch.dto';
-import FindClosestFilmSearchDTO from './dto/findClosestFilmSearch.dto';
 import UpdateFilmSearchDTO from './dto/updateFilmSearch.dto';
 
+@UseGuards(JwtAuthGuard)
 @Controller('film_search')
 export class FilmSearchController {
   constructor(private service: FilmSearchService) {}
 
-  @Post('create')
+  @Post('/')
   async create(@Body() body: FilmSearchDTO) {
     return this.service.create(body);
   }
 
-  @Post('find_closests')
-  async findClosestsTo(@Body() body: FindClosestFilmSearchDTO) {
-    return this.service.findClosestsTo(body);
+  @Get('/closests')
+  async findClosests(
+    @Query('latitude', ParseFloatPipe) latitude: number,
+    @Query('longitude', ParseFloatPipe) longitude: number,
+    @Query('maxDistance', ParseFloatPipe) maxDistance: number,
+  ) {
+    return this.service.findClosests(latitude, longitude, maxDistance);
   }
 
-  @Post('update')
-  async update(@Query('uuid') uuid: string, @Body() body: UpdateFilmSearchDTO) {
-    return this.service.update(uuid, body);
-  }
-
-  @Get('find')
-  async findByUuid(@Query('uuid') uuid: string) {
+  @Get('/:uuid')
+  async findByUuid(@Param('uuid') uuid: string) {
     return this.service.findByUuid(uuid);
   }
 
-  @Post('delete')
-  async delete(@Query('uuid') uuid: string) {
+  @Patch('/:uuid')
+  async update(@Param('uuid') uuid: string, @Body() body: UpdateFilmSearchDTO) {
+    return this.service.update(uuid, body);
+  }
+
+  @Delete('/:uuid')
+  async delete(@Param('uuid') uuid: string) {
     return this.service.delete(uuid);
   }
 }

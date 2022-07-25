@@ -2,8 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import FindClosestFilmSearchDTO from '@/business/controllers/filmSearch/dto/findClosestFilmSearch.dto';
-
 import { FilmSearchEntity } from './filmSearch.entity';
 
 @Injectable()
@@ -25,9 +23,20 @@ export class FilmSearchRepository {
     return this.repository.findOne(uuid);
   }
 
-  async findClosestsTo(body: FindClosestFilmSearchDTO) {
-    const query =
-      'SELECT uuid, title, description, locationLatitude, locationLongitude, locationDescription, (SQRT(POW(69.1 * (locationLatitude - ?), 2) + POW(69.1 * (? - locationLongitude) * COS(locationLatitude / 57.3), 2)))*1.6 AS distance FROM film_search HAVING distance < ? ORDER BY distance;';
-    return this.repository.query(query, [body.location.latitude, body.location.longitude, body.maxDistance]);
+  async update(uuid: string, data: Partial<FilmSearchEntity>) {
+    return this.repository.update(uuid, data);
+  }
+
+  async findClosests(latitude: number, longitude: number, maxDistance: number) {
+    const selectQuery = `uuid, title, description, locationLatitude, locationLongitude, locationDescription, 
+    (SQRT(POW(69.1 * (locationLatitude - :lat), 2) + POW(69.1 * (:lon - locationLongitude)
+     * COS(locationLatitude / 57.3), 2)))*1.6 AS distance`;
+    return this.repository
+      .createQueryBuilder()
+      .select(selectQuery)
+      .setParameters({ lat: latitude, lon: longitude })
+      .having('distance < :dist', { dist: maxDistance })
+      .orderBy('distance')
+      .getRawMany();
   }
 }

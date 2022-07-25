@@ -16,6 +16,12 @@ export class PaymentEntity extends BaseEntity {
   @Column()
   value: number;
 
+  @Column({ name: 'payer_id' })
+  payerId: string;
+
+  @Column({ name: 'collector_id' })
+  collectorId: string;
+
   @ManyToOne(() => SuscriptionEntity)
   suscription: SuscriptionEntity;
 }

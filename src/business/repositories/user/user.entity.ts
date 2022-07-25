@@ -1,7 +1,9 @@
 import { Exclude, instanceToPlain } from 'class-transformer';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, OneToOne } from 'typeorm';
 
 import { BaseEntity } from '@/business/repositories/base.entity';
+import { ConsumerEntity } from '@/business/repositories/consumer/consumer.entity';
+import { FilmmakerEntity } from '@/business/repositories/filmmaker/filmmaker.entity';
 import { EUserRole } from '@/enums/user.enums';
 
 @Entity({ name: 'user' })
@@ -32,6 +34,12 @@ export class UserEntity extends BaseEntity {
 
   @Column()
   role: EUserRole;
+
+  @OneToOne(() => ConsumerEntity)
+  consumer?: ConsumerEntity;
+
+  @OneToOne(() => FilmmakerEntity)
+  filmmaker?: FilmmakerEntity;
 
   toJSON() {
     return instanceToPlain(this);
