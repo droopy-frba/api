@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 
+import { CompanyEntity } from '../company/company.entity';
 import { SuscriptionEntity } from './suscription.entity';
 
 @Injectable()
@@ -24,5 +25,9 @@ export class SuscriptionRepository {
 
   async delete(uuid: string) {
     return this.repository.delete(uuid);
+  }
+
+  async findByCompany(company: CompanyEntity) {
+    return this.repository.findOne({ company });
   }
 }

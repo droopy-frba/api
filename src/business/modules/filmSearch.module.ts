@@ -6,9 +6,12 @@ import { FilmSearchEntity } from '@/business/repositories/filmSearch/filmSearch.
 import { FilmSearchRepository } from '@/business/repositories/filmSearch/filmSearch.repository';
 import { FilmSearchService } from '@/business/services/filmSearch.service';
 
+import { ConsumerModule } from './consumer.module';
+import { SuscriptionModule } from './suscription.module';
+
 @Module({
   controllers: [FilmSearchController],
-  imports: [TypeOrmModule.forFeature([FilmSearchEntity])],
+  imports: [TypeOrmModule.forFeature([FilmSearchEntity]), ConsumerModule, SuscriptionModule],
   providers: [FilmSearchService, FilmSearchRepository],
   exports: [TypeOrmModule, FilmSearchService, FilmSearchRepository],
 })

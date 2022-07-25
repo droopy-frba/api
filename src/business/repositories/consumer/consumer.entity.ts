@@ -11,6 +11,7 @@ export class ConsumerEntity extends BaseEntity {
   @JoinColumn()
   user: UserEntity;
 
-  @ManyToOne(() => CompanyEntity, { cascade: true })
+  @ManyToOne(() => CompanyEntity, { cascade: true, eager: true })
+  @JoinColumn({ name: 'companyUuid' })
   company: CompanyEntity;
 }
