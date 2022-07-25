@@ -14,7 +14,7 @@ export class FilmmakerEntity extends BaseEntity {
   @Column()
   review: number;
 
-  @OneToOne(() => UserEntity)
-  @JoinColumn()
+  @OneToOne(() => UserEntity, { eager: true })
+  @JoinColumn({ name: 'userUuid' })
   user: UserEntity;
 }
