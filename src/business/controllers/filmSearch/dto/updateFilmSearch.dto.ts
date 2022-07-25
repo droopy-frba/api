@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsDate, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 
 import { Location } from '@/business/repositories/filmSearch/location';
 import { EFilmSearchStatus } from '@/enums/filmSearch.enums';
@@ -22,8 +22,8 @@ export default class UpdateFilmSearchDTO {
   consumerUuid?: string;
 
   @IsOptional()
-  @IsNumber()
-  timeToExpiration?: number; // in minutes
+  @IsDate()
+  expirationDate?: Date;
 
   @IsOptional()
   @IsEnum(EFilmSearchStatus)

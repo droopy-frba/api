@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { AfterLoad, Column, Entity, ManyToOne } from 'typeorm';
 
 import { BaseEntity } from '@/business/repositories/base.entity';
 import { ESuscriptionStatus } from '@/enums/suscription.enums';
@@ -19,7 +19,10 @@ export class SuscriptionEntity extends BaseEntity {
   @ManyToOne(() => CompanyEntity)
   company: CompanyEntity;
 
-  async isActive() {
-    return this.status === ESuscriptionStatus.ACTIVE && this.availableHours > 0;
+  isActive: boolean;
+
+  @AfterLoad()
+  determineIsActive() {
+    this.isActive = this.status === ESuscriptionStatus.ACTIVE && this.availableHours > 0;
   }
 }

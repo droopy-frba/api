@@ -5,7 +5,6 @@ import { FilmSearchRepository } from '@/business/repositories/filmSearch/filmSea
 import { EFilmSearchStatus } from '@/enums/filmSearch.enums';
 
 import FilmSearchDTO from '../controllers/filmSearch/dto/filmsearch.dto';
-import FindClosestFilmSearchDTO from '../controllers/filmSearch/dto/findClosestFilmSearch.dto';
 import UpdateFilmSearchDTO from '../controllers/filmSearch/dto/updateFilmSearch.dto';
 import { ConsumerRepository } from '../repositories/consumer/consumer.repository';
 import { FilmSearchEntity } from '../repositories/filmSearch/filmSearch.entity';
@@ -23,10 +22,7 @@ export class FilmSearchService {
   ) {}
 
   async create(body: FilmSearchDTO) {
-    if (!(await this.consumerHasActiveSubscription(body.consumerUuid))) {
-      throw new BadRequestException('User does not have an active subscription');
-    }
-
+    await this.validateActiveSubscription(body.consumerUuid);
     const filmSearch = plainToClass(FilmSearchEntity, {
       location: body.location,
       title: body.title,
@@ -38,56 +34,35 @@ export class FilmSearchService {
     return this.filmSearchRepository.save(filmSearch);
   }
 
-  async findClosestsTo(body: FindClosestFilmSearchDTO) {
-    return this.filmSearchRepository.findClosestsTo(body);
+  async findClosests(latitude: number, longitude: number, maxDistance: number) {
+    return this.filmSearchRepository.findClosests(latitude, longitude, maxDistance);
   }
 
   async update(uuid: string, body: UpdateFilmSearchDTO) {
-    const filmSearch = await this.findByUuid(uuid);
-    const updatedFilmSearch = await this.updateFilmSearchFields(filmSearch, body, uuid);
-    return this.filmSearchRepository.save(updatedFilmSearch);
+    return this.filmSearchRepository.update(uuid, body);
   }
 
   async findByUuid(uuid: string) {
-    if (uuid === undefined) {
-      throw new BadRequestException('uuid is required');
-    }
-    const filmSearch = await this.filmSearchRepository.findOne(uuid);
-    if (filmSearch === undefined) {
-      throw new BadRequestException('Film search not found');
-    }
-    return filmSearch;
+    return this.filmSearchRepository.findOne(uuid);
   }
 
   async delete(uuid: string) {
-    this.findByUuid(uuid);
     return this.filmSearchRepository.delete(uuid);
   }
 
-  async calculateExpirationDate(minutesToExpiration: number) {
+  calculateExpirationDate(minutesToExpiration: number) {
     return new Date(new Date().getTime() + minutesToExpiration * 60000);
   }
 
-  async consumerHasActiveSubscription(consumerUuid: string) {
+  async validateActiveSubscription(consumerUuid: string) {
     const subscription = await this.getSubscriptionFromConsumerUuid(consumerUuid);
-    return subscription !== undefined && subscription.isActive();
+    if (subscription === undefined || !subscription.isActive) {
+      throw new BadRequestException('User does not have an active subscription');
+    }
   }
 
   async getSubscriptionFromConsumerUuid(consumerUuid: string) {
     const consumer = await this.consumerRepository.findOne(consumerUuid);
     return this.subscriptionRepository.findByCompany(consumer.company);
-  }
-
-  async updateFilmSearchFields(filmSearch: FilmSearchEntity, body: UpdateFilmSearchDTO, uuid: string) {
-    return plainToClass(FilmSearchEntity, {
-      uuid,
-      location: body.location || filmSearch.location,
-      title: body.title || filmSearch.title,
-      status: EFilmSearchStatus.PENDING || filmSearch.status,
-      description: body.description || filmSearch.description,
-      expirationDate: (await this.calculateExpirationDate(body.timeToExpiration)) || filmSearch.expirationDate,
-      consumer: (await this.consumerRepository.findOne(body.consumerUuid)) || filmSearch.consumer,
-      review: body.review || filmSearch.review,
-    });
   }
 }
