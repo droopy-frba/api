@@ -1,4 +1,4 @@
-import { Entity, ManyToOne, OneToOne } from 'typeorm';
+import { Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
 
 import { BaseEntity } from '@/business/repositories/base.entity';
 import { UserEntity } from '@/business/repositories/user/user.entity';
@@ -10,6 +10,7 @@ export class ConsumerEntity extends BaseEntity {
   @OneToOne(() => UserEntity)
   user: UserEntity;
 
-  @ManyToOne(() => CompanyEntity, { cascade: true })
+  @ManyToOne(() => CompanyEntity, { cascade: true, eager: true })
+  @JoinColumn({ name: 'companyUuid' })
   company: CompanyEntity;
 }

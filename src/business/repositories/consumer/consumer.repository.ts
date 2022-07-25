@@ -21,4 +21,8 @@ export class ConsumerRepository {
   async delete(uuid: string) {
     return this.repository.delete(uuid);
   }
+
+  async findOne(uuid: string) {
+    return this.repository.findOne({ uuid });
+  }
 }
