@@ -1,10 +1,9 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
-import { getManager } from 'typeorm';
 
 import { EPaymentStatus } from '@/enums/payment.enums';
 import { ESuscriptionStatus } from '@/enums/suscription.enums';
-import { MercadoPagoResponse, sendPayment } from '@/helpers/mercadopago.helpers';
+import { MercadoPagoResponse, getPayment, sendPayment } from '@/helpers/mercadopago.helpers';
 
 import { SuscriptionDTO } from '../controllers/suscription/dto/suscription.dto';
 import { ConsumerEntity } from '../repositories/consumer/consumer.entity';
@@ -41,15 +40,8 @@ export class SuscriptionService {
     if (!product) {
       throw new BadRequestException('The product does not exist.');
     }
-    const suscription: SuscriptionEntity = plainToClass(SuscriptionEntity, {
-      product,
-      hours: suscriptionData.hours,
-      availableHours: suscriptionData.hours,
-      company: consumer.company,
-      lastPaid: null,
-      status: ESuscriptionStatus.ACTIVE,
-    });
-    const response: MercadoPagoResponse = sendPayment(amount, user.email);
+
+    const response: MercadoPagoResponse = await sendPayment(amount, user.email);
 
     const payment: PaymentEntity = plainToClass(PaymentEntity, {
       externalPaymentId: response.id,
@@ -57,18 +49,53 @@ export class SuscriptionService {
       value: amount,
       payerId: response.payerId,
       collectorId: response.collectorId,
-      suscription,
     });
-    await getManager().transaction(async (transactionalEntityManager) => {
-      await this.suscriptionRepository.save(suscription, transactionalEntityManager);
-      await this.paymentRepository.save(payment, transactionalEntityManager);
+
+    const suscription: SuscriptionEntity = plainToClass(SuscriptionEntity, {
+      product,
+      hours: suscriptionData.hours,
+      availableHours: suscriptionData.hours,
+      company: consumer.company,
+      lastPaid: null,
+      status: ESuscriptionStatus.INACTIVE,
+      payment,
     });
+
+    await this.suscriptionRepository.save(suscription);
+
     return {
+      suscriptionUuid: suscription.uuid,
       URL: response.redirectURL,
     };
   }
 
-  async findById(id: string) {
-    return this.suscriptionRepository.findById(id);
+  async validateCheckout(suscriptionUuid: string) {
+    const suscription: SuscriptionEntity = await this.suscriptionRepository.findById(suscriptionUuid);
+
+    if (!suscription) {
+      throw new BadRequestException('The suscription does not exist.');
+    }
+
+    if (suscription.payment.status !== EPaymentStatus.PENDING) {
+      throw new BadRequestException('The suscription payment has been already validated.');
+    }
+
+    const response: MercadoPagoResponse = await getPayment(suscription.payment.externalPaymentId);
+
+    if (response.status.toUpperCase() === 'AUTHORIZED') {
+      suscription.lastPaid = new Date(Date.now());
+      suscription.status = ESuscriptionStatus.ACTIVE;
+      suscription.payment.status = EPaymentStatus.ACCEPTED;
+    } else {
+      suscription.payment.status = EPaymentStatus.REJECTED;
+    }
+
+    const suscriptionSaved = await this.suscriptionRepository.save(suscription);
+
+    return suscriptionSaved;
+  }
+
+  async findById(uuid: string) {
+    return this.suscriptionRepository.findById(uuid);
   }
 }

@@ -14,4 +14,8 @@ export class ProductRepository {
   async findByID(uuid: string) {
     return this.repository.findOne({ uuid });
   }
+
+  async findAll() {
+    return this.repository.find();
+  }
 }

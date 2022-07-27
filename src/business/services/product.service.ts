@@ -5,4 +5,8 @@ import { ProductRepository } from '@/business/repositories/product/product.repos
 @Injectable()
 export class ProductService {
   constructor(private repository: ProductRepository) {}
+
+  async findAll() {
+    return this.repository.findAll();
+  }
 }
