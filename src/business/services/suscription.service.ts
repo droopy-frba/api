@@ -3,7 +3,7 @@ import { plainToClass } from 'class-transformer';
 
 import { EPaymentStatus } from '@/enums/payment.enums';
 import { ESuscriptionStatus } from '@/enums/suscription.enums';
-import { MercadoPagoResponse, getPayment, sendPayment } from '@/helpers/mercadopago.helpers';
+import { MercadoPagoResponse, getPayment, sendPayment } from '@/services/mercadopago.services';
 
 import { SuscriptionDTO } from '../controllers/suscription/dto/suscription.dto';
 import { ConsumerEntity } from '../repositories/consumer/consumer.entity';

@@ -24,8 +24,8 @@ export class SuscriptionEntity extends BaseEntity {
   @Column()
   status: ESuscriptionStatus;
 
-  @Column({ name: 'last_paid', nullable: true })
-  lastPaid: Date;
+  @Column({ name: 'last_paid' })
+  lastPaid: Date | null;
 
   isActive: boolean;
 
