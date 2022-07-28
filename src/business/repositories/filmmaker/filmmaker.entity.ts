@@ -1,4 +1,4 @@
-import { Column, Entity, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 
 import { BaseEntity } from '@/business/repositories/base.entity';
 import { UserEntity } from '@/business/repositories/user/user.entity';
@@ -14,6 +14,7 @@ export class FilmmakerEntity extends BaseEntity {
   @Column()
   review: number;
 
-  @OneToOne(() => UserEntity)
+  @OneToOne(() => UserEntity, { eager: true })
+  @JoinColumn({ name: 'userUuid' })
   user: UserEntity;
 }

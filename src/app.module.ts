@@ -12,6 +12,7 @@ import { FilmSearchModule } from './business/modules/filmSearch.module';
 import { FilmmakerModule } from './business/modules/filmmaker.module';
 import { FilmmakerReviewModule } from './business/modules/filmmakerReview.module';
 import { PaymentModule } from './business/modules/payment.module';
+import { ProductModule } from './business/modules/product.module';
 import { SuscriptionModule } from './business/modules/suscription.module';
 import { UserModule } from './business/modules/user.module';
 
@@ -23,6 +24,7 @@ import { UserModule } from './business/modules/user.module';
     FilmmakerModule,
     AuthModule,
     PaymentModule,
+    ProductModule,
     SuscriptionModule,
     FilmmakerReviewModule,
     FilmSearchModule,

@@ -19,4 +19,7 @@ export const CONFIG = {
     from: process.env.EMAIL_FROM,
     name: process.env.EMAIL_NAME,
   },
+  mercadopago: {
+    token: process.env.MERCADOPAGO_ACCESS_TOKEN,
+  },
 };

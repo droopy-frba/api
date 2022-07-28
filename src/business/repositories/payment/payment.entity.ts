@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity, OneToOne } from 'typeorm';
 
 import { BaseEntity } from '@/business/repositories/base.entity';
 import { EPaymentStatus } from '@/enums/payment.enums';
@@ -16,6 +16,12 @@ export class PaymentEntity extends BaseEntity {
   @Column()
   value: number;
 
-  @ManyToOne(() => SuscriptionEntity)
+  @Column({ name: 'payer_id' })
+  payerId: string;
+
+  @Column({ name: 'collector_id' })
+  collectorId: string;
+
+  @OneToOne(() => SuscriptionEntity)
   suscription: SuscriptionEntity;
 }

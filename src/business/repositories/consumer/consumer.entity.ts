@@ -7,7 +7,8 @@ import { CompanyEntity } from '../company/company.entity';
 
 @Entity({ name: 'consumer' })
 export class ConsumerEntity extends BaseEntity {
-  @OneToOne(() => UserEntity)
+  @OneToOne(() => UserEntity, { eager: true })
+  @JoinColumn({ name: 'userUuid' })
   user: UserEntity;
 
   @ManyToOne(() => CompanyEntity, { cascade: true, eager: true })
