@@ -13,9 +13,6 @@ export default class FilmSearchDTO {
   @IsString()
   description: string;
 
-  @IsString()
-  consumerUuid: string;
-
   @IsNumber()
   timeToExpiration: number; // in minutes
 }

@@ -18,4 +18,20 @@ export class FilmPostulationRepository {
   async delete(uuid: string) {
     return this.repository.delete(uuid);
   }
+
+  async update(uuid: string, data: Partial<FilmPostulationEntity>) {
+    return this.repository.update(uuid, data);
+  }
+
+  async findByFilmSearch(filmSearchUuid: string, limit: number, offset: number) {
+    return this.repository.find({ where: { filmSearch: filmSearchUuid }, take: limit, skip: offset });
+  }
+
+  async findBySearchAndFilmmaker(filmSearchUuid: string, filmmakerUuid: string) {
+    return this.repository.findOne({ where: { filmSearch: filmSearchUuid, filmmaker: filmmakerUuid } });
+  }
+
+  async findByUuid(uuid: string) {
+    return this.repository.findOne(uuid);
+  }
 }

@@ -1,7 +1,20 @@
-import { Body, Controller, Delete, Get, Param, ParseFloatPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseFloatPipe,
+  Patch,
+  Post,
+  Query,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 
 import { FilmSearchService } from '@/business/services/filmSearch.service';
 import { JwtAuthGuard } from '@/guards/jwtAuth.guards';
+import { LoggedRequest } from '@/interfaces/request.interfaces';
 
 import FilmSearchDTO from './dto/filmsearch.dto';
 import UpdateFilmSearchDTO from './dto/updateFilmSearch.dto';
@@ -12,8 +25,8 @@ export class FilmSearchController {
   constructor(private service: FilmSearchService) {}
 
   @Post('/')
-  async create(@Body() body: FilmSearchDTO) {
-    return this.service.create(body);
+  async create(@Request() req: LoggedRequest, @Body() body: FilmSearchDTO) {
+    return this.service.create(req.user, body);
   }
 
   @Get('/closests')
@@ -23,6 +36,15 @@ export class FilmSearchController {
     @Query('maxDistance', ParseFloatPipe) maxDistance: number,
   ) {
     return this.service.findClosests(latitude, longitude, maxDistance);
+  }
+
+  @Get('/:uuid/film_postulations')
+  async findByFilmSearch(
+    @Param('uuid') uuid: string,
+    @Query('limit', ParseFloatPipe) limit: number,
+    @Query('offset', ParseFloatPipe) offset: number,
+  ) {
+    return this.service.findPostulations(uuid, limit, offset);
   }
 
   @Get('/:uuid')

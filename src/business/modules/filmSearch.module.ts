@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { FilmSearchController } from '@/business/controllers/filmSearch/filmSearch.controller';
@@ -7,11 +7,17 @@ import { FilmSearchRepository } from '@/business/repositories/filmSearch/filmSea
 import { FilmSearchService } from '@/business/services/filmSearch.service';
 
 import { ConsumerModule } from './consumer.module';
+import { FilmPostulationModule } from './filmPostulation.module';
 import { SuscriptionModule } from './suscription.module';
 
 @Module({
   controllers: [FilmSearchController],
-  imports: [TypeOrmModule.forFeature([FilmSearchEntity]), ConsumerModule, SuscriptionModule],
+  imports: [
+    TypeOrmModule.forFeature([FilmSearchEntity]),
+    ConsumerModule,
+    SuscriptionModule,
+    forwardRef(() => FilmPostulationModule),
+  ],
   providers: [FilmSearchService, FilmSearchRepository],
   exports: [TypeOrmModule, FilmSearchService, FilmSearchRepository],
 })
