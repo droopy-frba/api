@@ -2,6 +2,8 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
 
 import { FilmPostulationRepository } from '@/business/repositories/filmPostulation/filmPostulation.repository';
+import { EFilmPostulationStatus } from '@/enums/filmPostulation.enums';
+import { createAgoraUserToken } from '@/services/agora.services';
 
 import { UpdateFilmPostulationDTO } from '../controllers/filmPostulation/dto/updateFilmPostulationDTO.dto';
 import { FilmPostulationEntity } from '../repositories/filmPostulation/filmPostulation.entity';
@@ -16,6 +18,18 @@ export class FilmPostulationService {
     private filmSearchRepository: FilmSearchRepository,
     private filmmakerRepository: FilmmakerRepository,
   ) {}
+
+  async createVideoConnection(uuid: string, user: UserEntity) {
+    const filmPostulation = await this.validatePostulation(uuid, user);
+    if (filmPostulation.status !== EFilmPostulationStatus.ACCEPTED) {
+      throw new BadRequestException('Postulation must be in accepted status');
+    }
+    const expiration = Math.floor(Date.now() / 1000) + 60 * 60;
+    const isConsumer = filmPostulation.filmSearch.consumer?.user.uuid === user.uuid;
+    console.log(isConsumer);
+    const token = createAgoraUserToken(uuid, user.uuid, expiration, isConsumer);
+    return { token };
+  }
 
   async create(user: UserEntity, filmSearchUuid: string) {
     const filmSearch = await this.filmSearchRepository.findOne(filmSearchUuid);
@@ -36,6 +50,15 @@ export class FilmPostulationService {
   }
 
   async update(uuid: string, user: UserEntity, body: UpdateFilmPostulationDTO) {
+    await this.validatePostulation(uuid, user);
+    await this.repository.update(uuid, body);
+  }
+
+  async findByUuid(uuid: string) {
+    return this.repository.findByUuid(uuid);
+  }
+
+  private async validatePostulation(uuid: string, user: UserEntity) {
     const filmPostulation = await this.repository.findByUuid(uuid);
     if (!filmPostulation) {
       throw new BadRequestException('Invalid film postulation');
@@ -47,10 +70,6 @@ export class FilmPostulationService {
       // eslint-disable-next-line quotes
       throw new BadRequestException('You cannot update this film postulation');
     }
-    await this.repository.update(uuid, body);
-  }
-
-  async findByUuid(uuid: string) {
-    return this.repository.findByUuid(uuid);
+    return filmPostulation;
   }
 }
