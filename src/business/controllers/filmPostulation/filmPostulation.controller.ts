@@ -12,6 +12,11 @@ import { UpdateFilmPostulationDTO } from './dto/updateFilmPostulationDTO.dto';
 export class FilmPostulationController {
   constructor(private service: FilmPostulationService) {}
 
+  @Post('/:uuid/video-call/')
+  async createVideoConnection(@Param('uuid') uuid: string, @Request() req: LoggedRequest) {
+    return this.service.createVideoConnection(uuid, req.user);
+  }
+
   @Post('/')
   async create(@Request() req: LoggedRequest, @Body() body: CreateFilmPostulationDTO) {
     return this.service.create(req.user, body.filmSearchUuid);

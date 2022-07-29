@@ -22,4 +22,8 @@ export const CONFIG = {
   mercadopago: {
     token: process.env.MERCADOPAGO_ACCESS_TOKEN,
   },
+  agora: {
+    appId: process.env.AGORA_APP_ID,
+    appCertificate: process.env.AGORA_APP_CERTIFICATE,
+  },
 };
