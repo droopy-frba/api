@@ -57,7 +57,7 @@ export class SuscriptionService {
       availableHours: suscriptionData.hours,
       company: consumer.company,
       lastPaid: null,
-      status: ESuscriptionStatus.INACTIVE,
+      status: ESuscriptionStatus.PENDING,
       payment,
     });
 
@@ -69,26 +69,23 @@ export class SuscriptionService {
     };
   }
 
-  async validateCheckout(suscriptionUuid: string) {
-    const suscription: SuscriptionEntity = await this.suscriptionRepository.findById(suscriptionUuid);
+  async updateSuscriptionInformation(externalPaymentId: string) {
+    const payment: PaymentEntity = await this.paymentRepository.findByExternalPaymentId(externalPaymentId);
 
-    if (!suscription) {
+    if (!payment) {
       throw new BadRequestException('The suscription does not exist.');
     }
 
-    if (suscription.payment.status !== EPaymentStatus.PENDING) {
-      throw new BadRequestException('The suscription payment has been already validated.');
-    }
+    const suscription: SuscriptionEntity = await this.suscriptionRepository.findByPayment(payment);
 
-    const response: MercadoPagoResponse = await getPayment(suscription.payment.externalPaymentId);
+    const response: MercadoPagoResponse = await getPayment(externalPaymentId);
 
-    if (response.status.toUpperCase() === 'AUTHORIZED') {
-      suscription.lastPaid = new Date(Date.now());
-      suscription.status = ESuscriptionStatus.ACTIVE;
-      suscription.payment.status = EPaymentStatus.ACCEPTED;
-    } else {
-      suscription.payment.status = EPaymentStatus.REJECTED;
-    }
+    suscription.status = ESuscriptionStatus[response.status.toUpperCase()];
+
+    suscription.payment.status =
+      !response.semaphore || response.semaphore === 'green' ? EPaymentStatus.ACCEPTED : EPaymentStatus.REJECTED;
+
+    suscription.lastPaid = response.last_paid;
 
     const suscriptionSaved = await this.suscriptionRepository.save(suscription);
 

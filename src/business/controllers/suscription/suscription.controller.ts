@@ -4,8 +4,8 @@ import { SuscriptionService } from '@/business/services/suscription.service';
 import { JwtAuthGuard } from '@/guards/jwtAuth.guards';
 import { LoggedRequest } from '@/interfaces/request.interfaces';
 
+import { NotificationMercadoPagoDTO } from './dto/notificationMercadoPago';
 import { SuscriptionDTO } from './dto/suscription.dto';
-import { SuscriptionValidationDTO } from './dto/suscriptionValidation.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('suscription')
@@ -18,8 +18,8 @@ export class SuscriptionController {
   }
 
   @Post('validate')
-  async validate(@Body() suscriptionValidation: SuscriptionValidationDTO) {
-    return this.service.validateCheckout(suscriptionValidation.suscriptionUuid);
+  async validate(@Body() notificationMercadoPago: NotificationMercadoPagoDTO) {
+    return this.service.updateSuscriptionInformation(notificationMercadoPago.data.id);
   }
 
   @Get(':uuid')

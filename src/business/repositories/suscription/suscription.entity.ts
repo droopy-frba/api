@@ -1,6 +1,7 @@
 import { AfterLoad, AfterUpdate, Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
 
 import { BaseEntity } from '@/business/repositories/base.entity';
+import { EPaymentStatus } from '@/enums/payment.enums';
 import { ESuscriptionStatus } from '@/enums/suscription.enums';
 
 import { CompanyEntity } from '../company/company.entity';
@@ -36,6 +37,9 @@ export class SuscriptionEntity extends BaseEntity {
   @AfterLoad()
   @AfterUpdate()
   determineIsActive() {
-    this.isActive = this.status === ESuscriptionStatus.ACTIVE && this.availableHours > 0;
+    this.isActive =
+      this.status === ESuscriptionStatus.AUTHORIZED &&
+      this.payment.status === EPaymentStatus.ACCEPTED &&
+      this.availableHours > 0;
   }
 }
