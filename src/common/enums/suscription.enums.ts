@@ -1,4 +1,6 @@
 export enum ESuscriptionStatus {
-  ACTIVE,
-  INACTIVE,
+  PENDING = 'PENDING',
+  AUTHORIZED = 'AUTHORIZED',
+  PAUSED = 'PAUSED',
+  CANCELLED = 'CANCELLED',
 }

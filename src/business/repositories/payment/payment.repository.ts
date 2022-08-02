@@ -11,6 +11,10 @@ export class PaymentRepository {
     private repository: Repository<PaymentEntity>,
   ) {}
 
+  async findByExternalPaymentId(externalPaymentId: string) {
+    return this.repository.findOne({ externalPaymentId });
+  }
+
   async save(payment: PaymentEntity, transaction?: EntityManager) {
     if (transaction) {
       return transaction.save(payment);

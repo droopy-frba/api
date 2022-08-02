@@ -21,6 +21,10 @@ export class MercadoPagoResponse {
   payerId: string;
 
   status: string;
+
+  semaphore?: string;
+
+  last_paid?: Date;
 }
 
 export async function sendPayment(amount: number, email: string): Promise<MercadoPagoResponse> {
@@ -59,6 +63,8 @@ export async function getPayment(mercadopagoPaymentId: string): Promise<MercadoP
       redirectURL: response.body.init_point,
       payerId: response.body.payer_id,
       status: response.body.status,
+      semaphore: response.body.summarized.semaphore,
+      last_paid: response.body.summarized.last_charged_date as Date,
     });
   } catch {
     throw new BadRequestException('Retrieving payment has failed.');
